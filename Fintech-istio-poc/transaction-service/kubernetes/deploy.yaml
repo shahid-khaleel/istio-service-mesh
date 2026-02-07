@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+  namespace: default
+  labels:
+    app: transaction-service
+    version: transaction-v1   # ✅ correct version label
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-service
+  template:
+    metadata:
+      labels:
+        app: transaction-service
+        version: transaction-v1   # ✅ required for Istio telemetry
+    spec:
+      containers:
+      - name: transaction-service
+        image: shahid9741/transaction-service:v2
+        ports:
+        - containerPort: 8000
+        # Optional: Istio sidecar injection if namespace not labeled
+        # annotations:
+        #   sidecar.istio.io/inject: "true"
+        env:
+        - name: FRAUD_SERVICE_URL
+          value: "http://fraud-service.default.svc.cluster.local/check"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: transaction-service
+  ports:
+  - name: http  # ✅ valid
+    port: 80
+    targetPort: 8000
+    nodePort: 30081 
