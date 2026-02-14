@@ -1,28 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fraud-service
-  namespace: default
-  labels:
-    app: fraud-service
-    version: fraud-v1
+  name: fraud-service-v2
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: fraud-service
+      version: fraud-v2
   template:
     metadata:
       labels:
         app: fraud-service
-        version: fraud-v1   # ✅ important for Istio telemetry
+        version: fraud-v2
     spec:
       containers:
       - name: fraud-service
-        image: shahid9741/fraud-service:v2
+        image: shahid9741/fraud-service:v3
         ports:
         - containerPort: 8001
-
 ---
 apiVersion: v1
 kind: Service

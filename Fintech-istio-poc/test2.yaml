@@ -1,0 +1,37 @@
+#!/bin/bash
+
+user_ids=("user-101" "user-202" "user-303" "user-404")
+amounts=(1000 5000 9000 1500)
+
+for i in $(seq 1 1000000); do
+  uid=${user_ids[$RANDOM % ${#user_ids[@]}]}
+  amt=${amounts[$RANDOM % ${#amounts[@]}]}
+
+  # 10% of requests will include canary header
+  if [ $((RANDOM % 10)) -eq 0 ]; then
+    echo "---- Canary (delayed) request ----"
+    curl -s -w "\nTotal time: %{time_total}\n" \
+      -X POST http://172.22.127.138:30081/transaction \
+      -H "Content-Type: application/json" \
+      -H "x-canary: true" \
+      -d "{
+            \"user_id\": \"$uid\",
+            \"amount\": $amt,
+            \"country\": \"IN\",
+            \"merchant\": \"amazon\"
+          }"
+  else
+    curl -s -w "\nTotal time: %{time_total}\n" \
+      -X POST http://172.22.127.138:30081/transaction \
+      -H "Content-Type: application/json" \
+      -d "{
+            \"user_id\": \"$uid\",
+            \"amount\": $amt,
+            \"country\": \"IN\",
+            \"merchant\": \"amazon\"
+          }"
+  fi
+
+  echo "---- Request $i completed ----"
+done
+

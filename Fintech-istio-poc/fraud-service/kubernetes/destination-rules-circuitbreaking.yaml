@@ -1,0 +1,53 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: fraud-service
+spec:
+  host: fraud-service
+  subsets:
+  - name: v1
+    labels:
+      version: fraud-v1
+
+  - name: v2
+    labels:
+      version: fraud-v2
+    trafficPolicy:
+      connectionPool:
+        http:
+          http1MaxPendingRequests: 1
+          maxRequestsPerConnection: 1
+        tcp:
+          maxConnections: 1
+      outlierDetection:
+        consecutive5xxErrors: 1
+        interval: 5s
+        baseEjectionTime: 30s
+        maxEjectionPercent: 100
+
+###############################################################################
+
+#maxConnections: 1
+#Only one TCP connection allowed to a pod at a time.
+
+#http1MaxPendingRequests: 1
+#Only one request allowed to wait.
+
+#maxRequestsPerConnection: 1
+#Each connection handles exactly one request, then closes.
+
+#That means burst traffic will immediately trigger 503s.
+
+#Now outlier detection:
+
+#consecutive5xxErrors: 3
+#If a pod returns 3 errors in a row, eject it.
+
+#interval: 5s
+#Check every 5 seconds.
+
+#baseEjectionTime: 30s
+#Eject unhealthy pod for 30 seconds.
+
+#maxEjectionPercent: 100
+#All pods can be ejected if necessary (good for testing).
