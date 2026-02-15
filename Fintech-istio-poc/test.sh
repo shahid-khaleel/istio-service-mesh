@@ -8,7 +8,7 @@ for i in $(seq 1 1000000); do
   amt=${amounts[$RANDOM % ${#amounts[@]}]}
 
   curl -s -w "\nTotal time: %{time_total}\n" \
-    -X POST http://172.22.127.138:30081/transaction \
+    -X POST http://:172.19.30.208:30081/transaction \
     -H "Content-Type: application/json" \
     -d "{
           \"user_id\": \"$uid\",

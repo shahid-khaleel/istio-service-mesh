@@ -1,0 +1,118 @@
+[0m[0KapiVersion: apps/v1[0K
+kind: Deployment[0K
+metadata:[0K
+  annotations:[0K
+    deployment.kubernetes.io/revision: "5"[0K
+    kubectl.kubernetes.io/last-applied-configuration: |[0K
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"opentelemetry-collector","namespace":"defaul[0Kt
+"},"spec":{"selector":{"matchLabels":{"app":"opentelemetry-collector"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":[0K1
+},"type":"RollingUpdate"},"template":{"metadata":{"labels":{"app":"opentelemetry-collector","sidecar.istio.io/inject":"false"}},"sp[0Ke
+c":{"containers":[{"command":["/otelcol","--config=/conf/opentelemetry-collector-config.yaml"],"env":[{"name":"POD_NAME","valueFrom[0K"
+:{"fieldRef":{"apiVersion":"v1","fieldPath":"metadata.name"}}},{"name":"POD_NAMESPACE","valueFrom":{"fieldRef":{"apiVersion":"v1","[0Kf
+ieldPath":"metadata.namespace"}}}],"image":"otel/opentelemetry-collector:0.54.0","imagePullPolicy":"IfNotPresent","name":"opentelem[0Ke
+try-collector","ports":[{"containerPort":4317,"protocol":"TCP"},{"containerPort":4318,"protocol":"TCP"},{"containerPort":55678,"nam[0Ke
+":"grpc-opencensus","protocol":"TCP"}],"resources":{"limits":{"cpu":"2","memory":"4Gi"},"requests":{"cpu":"200m","memory":"400Mi"}}[0K,
+"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","volumeMounts":[{"mountPath":"/conf","name":"open[0Kt
+elemetry-collector-config-vol"}]}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","termina[0Kt
+ionGracePeriodSeconds":30,"volumes":[{"configMap":{"defaultMode":420,"items":[{"key":"opentelemetry-collector-config","path":"opent[0Ke
+lemetry-collector-config.yaml"}],"name":"opentelemetry-collector-conf"},"name":"opentelemetry-collector-config-vol"}]}}}}[0K
+  creationTimestamp: "2026-02-15T11:06:34Z"[0K
+  generation: 5[0K
+  labels:[0K
+    app: opentelemetry-collector[0K
+    version: v1[0K
+  name: opentelemetry-collector[0K
+  namespace: default[0K
+  resourceVersion: "3347"[0K
+  uid: 29b1fabe-e0af-4f4a-88dd-39675865bf4b[0K
+spec:[0K
+  progressDeadlineSeconds: 600[0K
+  replicas: 1[0K
+  revisionHistoryLimit: 10[0K
+  selector:[0K
+    matchLabels:[0K
+      app: opentelemetry-collector[0K
+  strategy:[0K
+    rollingUpdate:[0K
+      maxSurge: 1[0K
+      maxUnavailable: 1[0K
+    type: RollingUpdate[0K
+  template:[0K
+    metadata:[0K
+      annotations:[0K
+        kubectl.kubernetes.io/restartedAt: "2026-02-15T16:52:46+05:30"[0K
+      labels:[0K
+        app: opentelemetry-collector[0K
+        version: v1[0K
+    spec:[0K
+      containers:[0K
+      - command:[0K
+        - /otelcol[0K
+        - --config=/conf/opentelemetry-collector-config.yaml[0K
+        env:[0K
+        - name: POD_NAME[0K
+          valueFrom:[0K
+            fieldRef:[0K
+              apiVersion: v1[0K
+              fieldPath: metadata.name[0K
+        - name: POD_NAMESPACE[0K
+          valueFrom:[0K
+            fieldRef:[0K
+              apiVersion: v1[0K
+              fieldPath: metadata.namespace[0K
+        image: otel/opentelemetry-collector:0.54.0[0K
+        imagePullPolicy: IfNotPresent[0K
+        name: opentelemetry-collector[0K
+        ports:[0K
+        - containerPort: 4317[0K
+          protocol: TCP[0K
+        - containerPort: 4318[0K
+          protocol: TCP[0K
+        - containerPort: 55678[0K
+          name: grpc-opencensus[0K
+          protocol: TCP[0K
+        resources:[0K
+          limits:[0K
+            cpu: "2"[0K
+            memory: 4Gi[0K
+          requests:[0K
+            cpu: 200m[0K
+            memory: 400Mi[0K
+        terminationMessagePath: /dev/termination-log[0K
+        terminationMessagePolicy: File[0K
+        volumeMounts:[0K
+        - mountPath: /conf[0K
+          name: opentelemetry-collector-config-vol[0K
+      dnsPolicy: ClusterFirst[0K
+      restartPolicy: Always[0K
+      schedulerName: default-scheduler[0K
+      securityContext: {}[0K
+      terminationGracePeriodSeconds: 30[0K
+      volumes:[0K
+      - configMap:[0K
+          defaultMode: 420[0K
+          items:[0K
+          - key: opentelemetry-collector-config[0K
+            path: opentelemetry-collector-config.yaml[0K
+          name: opentelemetry-collector-conf[0K
+        name: opentelemetry-collector-config-vol[0K
+status:[0K
+  availableReplicas: 1[0K
+  conditions:[0K
+  - lastTransitionTime: "2026-02-15T11:06:40Z"[0K
+    lastUpdateTime: "2026-02-15T11:06:40Z"[0K
+    message: Deployment has minimum availability.[0K
+    reason: MinimumReplicasAvailable[0K
+    status: "True"[0K
+    type: Available[0K
+  - lastTransitionTime: "2026-02-15T11:06:38Z"[0K
+    lastUpdateTime: "2026-02-15T11:22:54Z"[0K
+    message: ReplicaSet "opentelemetry-collector-7977bb994" has successfully progressed.[0K
+    reason: NewReplicaSetAvailable[0K
+    status: "True"[0K
+    type: Progressing[0K
+  observedGeneration: 5[0K
+  readyReplicas: 1[0K
+  replicas: 1[0K
+  updatedReplicas: 1[0K
+[0K

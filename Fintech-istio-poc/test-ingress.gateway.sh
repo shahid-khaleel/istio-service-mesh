@@ -11,7 +11,7 @@ for i in $(seq 1 1000000); do
   if [ $((RANDOM % 10)) -eq 0 ]; then
     echo "---- Canary (delayed) request ----"
     curl -s -w "\nTotal time: %{time_total}\n" \
-      -X POST http://172.22.127.138:30081/transaction \
+      -X POST http://localhost:8080/transaction \
       -H "Content-Type: application/json" \
       -H "x-canary: true" \
       -d "{
@@ -22,7 +22,7 @@ for i in $(seq 1 1000000); do
           }"
   else
     curl -s -w "\nTotal time: %{time_total}\n" \
-      -X POST http://172.22.127.138:30081/transaction \
+      -X POST http://localhost:8080/transaction \
       -H "Content-Type: application/json" \
       -d "{
             \"user_id\": \"$uid\",
