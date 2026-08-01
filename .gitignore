@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+venv/
+.venv/
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+nohup.out
+
+# Vendored Istio release (forward-looking only — istio-1.22.1/ is already
+# tracked in git history as of this commit; see README.md "Known Issues /
+# Recommendations" for the recommendation to stop vendoring it, ideally via
+# a history rewrite or Git LFS. This entry just prevents re-adding it if it
+# is ever removed and re-downloaded locally.)
+istio-1.22.1/
