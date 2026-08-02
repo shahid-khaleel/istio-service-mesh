@@ -1,0 +1,120 @@
+name: Validate
+
+# Lightweight, credential-free static validation for the authored POC in
+# Fintech-istio-poc/. The vendored istio-1.22.1/ release is intentionally
+# excluded from every job below (see README "Known Issues").
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Fintech-istio-poc/**"
+      - ".github/workflows/validate.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Fintech-istio-poc/**"
+      - ".github/workflows/validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hadolint:
+    name: hadolint (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [fraud-service, transaction-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Fintech-istio-poc/${{ matrix.service }}/Dockerfile
+
+  k8s-manifests:
+    name: yamllint + kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: yamllint kubernetes manifests
+        run: |
+          yamllint -d relaxed \
+            Fintech-istio-poc/fraud-service/kubernetes \
+            Fintech-istio-poc/transaction-service/kubernetes
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz \
+            | tar xz kubeconform
+          sudo install -m 0755 kubeconform /usr/local/bin/kubeconform
+
+      - name: kubeconform kubernetes manifests
+        run: |
+          # -schema-location default            -> built-in core Kubernetes schemas
+          # -schema-location datreeio catalog    -> community-maintained Istio CRD schemas
+          #                                          (Gateway, VirtualService, DestinationRule,
+          #                                          PeerAuthentication)
+          # -ignore-missing-schemas              -> don't hard-fail if a specific CRD
+          #                                          version isn't in the catalog; core
+          #                                          resources (Deployment/Service) are
+          #                                          still fully validated
+          kubeconform -summary \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -ignore-missing-schemas \
+            Fintech-istio-poc/fraud-service/kubernetes \
+            Fintech-istio-poc/transaction-service/kubernetes
+
+  python-lint:
+    name: python-lint (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [fraud-service, transaction-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: pip install ruff flake8
+
+      - name: ruff check
+        working-directory: Fintech-istio-poc/${{ matrix.service }}/app
+        run: ruff check .
+
+      - name: flake8
+        working-directory: Fintech-istio-poc/${{ matrix.service }}/app
+        run: flake8 . --max-line-length=100
+
+      - name: python -m py_compile
+        working-directory: Fintech-istio-poc/${{ matrix.service }}/app
+        run: python -m py_compile *.py
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        run: |
+          shellcheck -S warning \
+            Fintech-istio-poc/test.sh \
+            Fintech-istio-poc/test2.sh \
+            "Fintech-istio-poc/test-ingress.gateway.sh"

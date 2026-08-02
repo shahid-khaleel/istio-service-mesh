@@ -1,5 +1,6 @@
 # Istio Service Mesh POC — Fintech Microservices
 
+[![Validate](https://github.com/shahid-khaleel/istio-service-mesh/actions/workflows/validate.yml/badge.svg)](https://github.com/shahid-khaleel/istio-service-mesh/actions/workflows/validate.yml)
 ![Istio](https://img.shields.io/badge/Istio-1.22.1-466BB0?logo=istio&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-ready-326CE5?logo=kubernetes&logoColor=white)
 ![Service Mesh](https://img.shields.io/badge/Service%20Mesh-mTLS%20%7C%20Ingress%20%7C%20Fault%20Injection-blue)
@@ -80,6 +81,19 @@ flowchart TD
 - **Services:** Python 3.11, FastAPI, Uvicorn, Pydantic v2, `requests` (see each service's `requirements.txt`)
 - **Containers:** Docker (`python:3.11-slim` base images)
 - **Observability (optional/partial):** OpenTelemetry Collector manifest, Kiali (referenced via screenshot; not itself part of this repo)
+
+## Continuous Integration
+
+A lightweight, credential-free GitHub Actions workflow (`.github/workflows/validate.yml`) runs static validation on every push/PR that touches `Fintech-istio-poc/`. It never touches the vendored `istio-1.22.1/` release. Jobs:
+
+| Job | Checks |
+|---|---|
+| `hadolint` | Both Dockerfiles (`fraud-service`, `transaction-service`) |
+| `k8s-manifests` | `yamllint` + `kubeconform` (core Kubernetes + Istio CRD schemas) against both services' `kubernetes/` manifests |
+| `python-lint` | `ruff`, `flake8`, and `python -m py_compile` against both services' FastAPI app code |
+| `shellcheck` | `test.sh`, `test2.sh`, `test-ingress.gateway.sh` |
+
+This is static linting/validation only — there is no build/push/deploy step and no cloud credentials are used. It does not replace the "no automated tests or CI" gap noted below with respect to *runtime* test coverage; it catches syntax, style, and manifest-schema issues before they reach a cluster.
 
 ## Prerequisites
 
@@ -168,7 +182,7 @@ All three scripts are load-generation / manual-verification tools, not automated
 - Circuit breaking / outlier detection config on a `fraud-service` subset
 
 **Real gaps / not yet done:**
-- No automated tests or CI (the shell scripts are manual load-generation tools, not a test suite with assertions)
+- No automated *tests* (the shell scripts are manual load-generation tools, not a test suite with assertions) — a static-validation CI workflow now exists (see [Continuous Integration](#continuous-integration)), but it lints/validates syntax and manifest schemas, it does not deploy or exercise the mesh
 - No `AuthorizationPolicy` — mTLS provides transport security only, not service-to-service authorization
 - Header-based canary routing (`x-canary`) is not actually exercised end-to-end by the provided test scripts (see [Known Gap](#what-the-test-scripts-actually-do) above)
 - Several near-duplicate experimental manifests (`virtualservice-latency-v2/v3/v4 copy.yaml`, `virtualservice-error-injection-v5.yaml`) were never consolidated into a single, clearly-versioned demo flow — useful for learning history but should eventually be pruned/organized (e.g. into a `kubernetes/experiments/` subfolder) if this repo continues to evolve
